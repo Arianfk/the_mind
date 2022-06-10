@@ -38,7 +38,6 @@ public class Deck {
         return out;
     }
 
-
     /**
      *
      * @param t is number of wanted randomNumbers
