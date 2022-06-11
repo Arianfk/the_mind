@@ -11,7 +11,7 @@ public class Server {
 
     public static void main(String[] args) {
         try {
-            serverSocket = new ServerSocket(8080);
+            serverSocket = new ServerSocket(80);
             while (true) {
                 SessionHandler newSession = new SessionHandler(serverSocket.accept());
                 sessions.add(newSession);

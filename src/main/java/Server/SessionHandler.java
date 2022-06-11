@@ -17,6 +17,7 @@ public class SessionHandler extends Thread {
         this.connectionHandler = new ConnectionHandler(socket);
 
         this.authToken = new byte[32];
+        connectionHandler.setAuthToken(authToken);
         SecureRandom secureRandom = new SecureRandom();
         secureRandom.nextBytes(authToken);
     }
@@ -30,6 +31,9 @@ public class SessionHandler extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        System.out.println(connectionHandler.waitForMessage());
+        connectionHandler.sendMessage("Well Done!");
     }
 
     public void close() {
