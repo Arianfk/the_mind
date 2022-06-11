@@ -1,20 +1,20 @@
-package Server;
+package Util;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import Server.MyInputStream;
+import Server.MyOutputStream;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 
-public class ClientHandler extends Thread {
-    private final BufferedReader inputStream;
-    private final DataOutputStream outputStream;
+public class ConnectionHandler extends Thread {
+    private final MyInputStream inputStream;
+    private final MyOutputStream outputStream;
     private MessageRecieveListener messageReceiveListener;
 
-    public ClientHandler(Socket socket) {
+    public ConnectionHandler(Socket socket) {
         try {
-            this.inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.outputStream = new DataOutputStream(socket.getOutputStream());
+            this.inputStream = new MyInputStream(socket.getInputStream());
+            this.outputStream = new MyOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -30,7 +30,7 @@ public class ClientHandler extends Thread {
 
     public void sendMessage(String message) {
         try {
-            outputStream.writeUTF(message);
+            outputStream.write(message);
             outputStream.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -39,7 +39,7 @@ public class ClientHandler extends Thread {
 
     public String waitForMessage() {
         try {
-            return inputStream.readLine();
+            return inputStream.nextLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
