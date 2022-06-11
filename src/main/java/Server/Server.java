@@ -1,37 +1,24 @@
 package Server;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
+    static ServerSocket serverSocket;
+    static List<SessionHandler> sessions = new ArrayList<>();
+
     public static void main(String[] args) {
         try {
-            ServerSocket serverSocket = new ServerSocket(8080);
-
-            List<Socket> sockets = new ArrayList<>();
+            serverSocket = new ServerSocket(8080);
             while (true) {
-                Socket socket = serverSocket.accept();
-                sockets.add(socket);
-
-                Runnable runnable = () -> {
-                    try {
-                        DataInputStream inputStream = new DataInputStream(socket.getInputStream());
-                        while (true) {
-                            System.out.println(inputStream.readUTF());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                };
-
-                (new Thread(runnable)).start();
+                SessionHandler newSession = new SessionHandler(serverSocket.accept());
+                sessions.add(newSession);
+                newSession.start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }
