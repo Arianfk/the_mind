@@ -1,8 +1,5 @@
 package Util;
 
-import Server.MyInputStream;
-import Server.MyOutputStream;
-
 import java.io.IOException;
 import java.net.Socket;
 
@@ -20,6 +17,14 @@ public class ConnectionHandler extends Thread {
         }
     }
 
+    public MyInputStream getInputStream() {
+        return inputStream;
+    }
+
+    public MyOutputStream getOutputStream() {
+        return outputStream;
+    }
+
     public MessageRecieveListener getMessageReceiveListener() {
         return messageReceiveListener;
     }
@@ -30,7 +35,7 @@ public class ConnectionHandler extends Thread {
 
     public void sendMessage(String message) {
         try {
-            outputStream.write(message);
+            outputStream.writeLine(message);
             outputStream.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);

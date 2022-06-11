@@ -1,4 +1,4 @@
-package Server;
+package Util;
 
 import java.io.DataOutputStream;
 import java.io.FilterOutputStream;
@@ -20,7 +20,8 @@ public class MyOutputStream extends DataOutputStream {
         super(out);
     }
 
-    public void write(String s) throws IOException {
-        write(s.getBytes(StandardCharsets.UTF_8), 0, s.length());
+    public void writeLine(String s) throws IOException {
+        String tmp = s + '\n';
+        write(tmp.getBytes(StandardCharsets.UTF_8), 0, tmp.length());
     }
 }

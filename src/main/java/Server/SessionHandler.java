@@ -4,26 +4,32 @@ import Util.ConnectionHandler;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.security.SecureRandom;
 
 public class SessionHandler extends Thread {
     private final Socket socket;
-    private final ConnectionHandler clientHandler;
+    private final ConnectionHandler connectionHandler;
+    private final byte[] authToken;
     private int numberOfPlayers;
 
     public SessionHandler(Socket socket) {
         this.socket = socket;
-        this.clientHandler = new ConnectionHandler(socket);
+        this.connectionHandler = new ConnectionHandler(socket);
+
+        this.authToken = new byte[32];
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextBytes(authToken);
     }
 
     @Override
     public void run() {
         super.run();
 
-        clientHandler.sendMessage("Session Created\n");
-        //numberOfPlayers = Integer.parseInt(clientHandler.waitForMessage());
-        String s = clientHandler.waitForMessage();
-        System.out.println(s);
-        //System.out.println(numberOfPlayers);
+        try {
+            connectionHandler.getOutputStream().write(authToken);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void close() {
