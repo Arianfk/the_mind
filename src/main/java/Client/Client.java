@@ -1,6 +1,7 @@
 package Client;
 
-import Util.ConnectionHandler;
+import Connection.ConnectionHandler;
+import Connection.Message;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -14,13 +15,11 @@ public class Client {
         socket = new Socket("localhost", 80);
         connectionHandler = new ConnectionHandler(socket);
 
-        authToken = new byte[32];
-        connectionHandler.getInputStream().read(authToken);
-        System.out.println(new String(authToken));
-        connectionHandler.setAuthToken(authToken);
+        Message message = connectionHandler.waitForMessage();
+        authToken = message.getAuthToken();
 
-        connectionHandler.sendMessage("Token Received");
+        connectionHandler.sendMessage(new Message(authToken, "Token Received!?"));
 
-        System.out.println(connectionHandler.waitForMessage());
+        System.out.println(new String(connectionHandler.waitForMessage().getBody()));
     }
 }

@@ -1,6 +1,7 @@
 package Server;
 
-import Util.ConnectionHandler;
+import Connection.ConnectionHandler;
+import Connection.Message;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -17,7 +18,6 @@ public class SessionHandler extends Thread {
         this.connectionHandler = new ConnectionHandler(socket);
 
         this.authToken = new byte[32];
-        connectionHandler.setAuthToken(authToken);
         SecureRandom secureRandom = new SecureRandom();
         secureRandom.nextBytes(authToken);
     }
@@ -26,14 +26,10 @@ public class SessionHandler extends Thread {
     public void run() {
         super.run();
 
-        try {
-            connectionHandler.getOutputStream().write(authToken);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        connectionHandler.sendMessage(new Message(authToken));
+        System.out.println(new String(connectionHandler.waitForMessage().getBody()));
 
-        System.out.println(connectionHandler.waitForMessage());
-        connectionHandler.sendMessage("Well Done!");
+        connectionHandler.sendMessage(new Message(authToken, "Well Done"));
     }
 
     public void close() {

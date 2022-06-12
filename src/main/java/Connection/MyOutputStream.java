@@ -1,4 +1,4 @@
-package Util;
+package Connection;
 
 import java.io.DataOutputStream;
 import java.io.FilterOutputStream;
