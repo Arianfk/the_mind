@@ -38,6 +38,16 @@ public class numericalCardsDatabase {
         return out;
     }
 
+    public static LinkedList<String> convertIdToNumericalCardsNumber(LinkedList<String> cardIds){
+        LinkedList<String> out=new LinkedList<>();
+        for (numericalCard numericalCard : getNumericalCards()){
+            if (cardIds.contains(numericalCard.getCardId())){
+                out.add(numericalCard.getCardsNumber()+"");
+            }
+        }
+        return out;
+    }
+
     public static numericalCard getCardWithMinimumNumber(LinkedList<numericalCard> cards){
         if (cards==null){
             return null;

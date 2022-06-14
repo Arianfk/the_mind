@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
 
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.ControllerTest" />
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="538.0" prefWidth="758.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.ControllerTest">
+   <children>
+      <ListView fx:id="gameCardsInformation" layoutX="33.0" layoutY="60.0" prefHeight="451.0" prefWidth="249.0" />
+      <ListView fx:id="yourCards" layoutX="531.0" layoutY="60.0" prefHeight="124.0" prefWidth="200.0" />
+      <Label fx:id="LastPlayedCardLable" layoutX="338.0" layoutY="114.0" text="last played card" />
+      <Text layoutX="354.0" layoutY="95.0" strokeType="OUTSIDE" strokeWidth="0.0" text="last card :" />
+      <Text layoutX="131.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="game info" />
+      <Text layoutX="603.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="your cards" />
+      <ChoiceBox fx:id="EmojiChoosingBox" layoutX="555.0" layoutY="340.0" prefWidth="150.0" />
+      <Text layoutX="595.0" layoutY="317.0" strokeType="OUTSIDE" strokeWidth="0.0" text="choose emoji" />
+   </children>
+</AnchorPane>

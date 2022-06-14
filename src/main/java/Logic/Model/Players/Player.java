@@ -17,6 +17,10 @@ public class Player {
         return numericalCardsDatabase.convertIdToNumericalCards(cardsIds);
     }
 
+    public LinkedList<String> getNumericalCardsNumber(){
+        return numericalCardsDatabase.convertIdToNumericalCardsNumber(cardsIds);
+    }
+
     public Optional<numericalCard> getCardWithMinNumber(){
 
         LinkedList<numericalCard> numericalCardLinkedList=getNumericalCards();
