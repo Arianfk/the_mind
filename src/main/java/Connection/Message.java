@@ -50,6 +50,18 @@ public class Message {
         this.header = 0;
     }
 
+    public Message(String body) {
+        this.authToken = new byte[AUTH_TOKEN_LENGTH];
+        setBody(body);
+        this.header = 0;
+    }
+
+    public Message(String body, byte header) {
+        this.authToken = new byte[AUTH_TOKEN_LENGTH];
+        setBody(body);
+        this.header = header;
+    }
+
     public byte[] getAuthToken() {
         return authToken;
     }

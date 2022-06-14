@@ -6,10 +6,19 @@ import java.nio.ByteBuffer;
 
 public class ConnectionHandler extends Thread {
     private final Socket socket;
+    private byte[] authToken;
     private MessageRecieveListener messageReceiveListener;
 
     public ConnectionHandler(Socket socket) {
         this.socket = socket;
+    }
+
+    public byte[] getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(byte[] authToken) {
+        this.authToken = authToken;
     }
 
     public MessageRecieveListener getMessageReceiveListener() {
@@ -26,6 +35,11 @@ public class ConnectionHandler extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void sendWithAT(Message message) {
+        message.setAuthToken(authToken);
+        sendMessage(message);
     }
 
     public Message waitForMessage() {
