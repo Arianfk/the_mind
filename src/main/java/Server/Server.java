@@ -9,7 +9,7 @@ public class Server {
     static ServerSocket serverSocket;
     static List<SessionHandler> sessions = new ArrayList<>();
 
-    public static void main(String[] args) {
+    public static void mainn(String[] args) {
         try {
             serverSocket = new ServerSocket(80);
             while (true) {

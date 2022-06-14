@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Client {
+
     private Socket socket;
     private ConnectionHandler connectionHandler;
     private byte[] authToken;
@@ -18,6 +19,7 @@ public class Client {
         Message message = connectionHandler.waitForMessage();
         authToken = message.getAuthToken();
 
+        //test
         connectionHandler.sendMessage(new Message(authToken, "Token Received!?"));
 
         System.out.println(new String(connectionHandler.waitForMessage().getBody()));
