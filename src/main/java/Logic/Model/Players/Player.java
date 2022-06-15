@@ -11,7 +11,6 @@ public class Player {
 
     public String id;
     public Logic.Model.Game.game game;
-
     public LinkedList<String> cardsIds;
 
     public Logic.Model.Game.game getGame() {
@@ -28,6 +27,7 @@ public class Player {
     public Integer getNumberOfCards(){
         return getCardsIds().size();
     }
+
     public LinkedList<numericalCard> getNumericalCards(){
         return numericalCardsDatabase.convertIdToNumericalCards(getCardsIds());
     }

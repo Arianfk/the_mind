@@ -3,11 +3,9 @@ package Logic.Model.Game;
 import Logic.Database.PlayersDatabase;
 import Logic.Database.numericalCardsDatabase;
 import Logic.Model.Cards.numericalCard;
-import Logic.Model.GenerateId;
 import Logic.Model.GenerateIds;
 import Logic.Model.Players.Player;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class game {
@@ -27,12 +25,12 @@ public class game {
         return lastPlayedCardId;
     }
 
-    public String getLastPlayedCardNumber(){
-        numericalCard card =numericalCardsDatabase.searchByCardId(lastPlayedCardId);
-        if (card==null){
+    public String getLastPlayedCardNumber() {
+        numericalCard card = numericalCardsDatabase.searchByCardId(lastPlayedCardId);
+        if (card == null) {
             return null;
         }
-        return card.getCardsNumber()+"";
+        return card.getCardsNumber() + "";
     }
 
     public Integer getNumberOfHeartCards() {
@@ -44,13 +42,13 @@ public class game {
     }
 
     public LinkedList<String> getPlayersId() {
-        if (playersId==null){
-            playersId=new LinkedList<>();
+        if (playersId == null) {
+            playersId = new LinkedList<>();
         }
         return playersId;
     }
 
-    public LinkedList<Player> getPlayers(){
+    public LinkedList<Player> getPlayers() {
         return PlayersDatabase.convertPlayersIdToPlayers(getPlayersId());
     }
 
