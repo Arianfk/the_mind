@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity"
-            prefHeight="538.0" prefWidth="758.0" xmlns="http://javafx.com/javafx/16"
-            fx:controller="GUI.ControllerTest">
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="538.0" prefWidth="758.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.ControllerTest">
     <children>
-        <ListView fx:id="gameCardsInformation" layoutX="33.0" layoutY="60.0" prefHeight="351.0" prefWidth="250.0"/>
-        <ListView fx:id="yourCards" layoutX="531.0" layoutY="60.0" prefHeight="124.0" prefWidth="200.0"/>
-        <Label fx:id="LastPlayedCardLabel" alignment="CENTER" layoutX="320.0" layoutY="112.0" prefHeight="143.0"
-               prefWidth="118.0" text="last">
+        <ListView fx:id="gameCardsInformation" layoutX="33.0" layoutY="60.0" prefHeight="351.0" prefWidth="250.0" />
+        <ListView fx:id="yourCards" layoutX="531.0" layoutY="60.0" prefHeight="199.0" prefWidth="200.0" />
+        <Label fx:id="LastPlayedCardLabel" alignment="CENTER" layoutX="320.0" layoutY="112.0" prefHeight="143.0" prefWidth="118.0" text="last">
             <font>
-                <Font size="24.0"/>
+                <Font size="24.0" />
             </font>
         </Label>
-        <Text layoutX="354.0" layoutY="95.0" strokeType="OUTSIDE" strokeWidth="0.0" text="last card :"/>
-        <Text layoutX="131.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="game info"/>
-        <Text layoutX="603.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="your cards"/>
-        <Text layoutX="595.0" layoutY="317.0" strokeType="OUTSIDE" strokeWidth="0.0" text="choose emoji"/>
-        <Label fx:id="heartNumberLabel" layoutX="33.0" layoutY="419.0" text="Heart: "/>
-        <Label fx:id="ninjaNumberLabel" layoutX="33.0" layoutY="437.0" text="Ninja: "/>
-        <MenuButton fx:id="emojiMenu" layoutX="605.0" layoutY="332.0" mnemonicParsing="false" text="emj"/>
+        <Text layoutX="354.0" layoutY="95.0" strokeType="OUTSIDE" strokeWidth="0.0" text="last card :" />
+        <Text layoutX="131.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="game info" />
+        <Text layoutX="603.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="your cards" />
+        <Text layoutX="595.0" layoutY="317.0" strokeType="OUTSIDE" strokeWidth="0.0" text="choose emoji" />
+        <Label fx:id="heartNumberLabel" layoutX="33.0" layoutY="419.0" text="Heart: " />
+        <Label fx:id="ninjaNumberLabel" layoutX="33.0" layoutY="437.0" text="Ninja: " />
+        <MenuButton fx:id="emojiMenu" layoutX="605.0" layoutY="332.0" mnemonicParsing="false" text="emj" />
     </children>
 </AnchorPane>
