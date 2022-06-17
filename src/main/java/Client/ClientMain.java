@@ -21,6 +21,8 @@ public class ClientMain extends Application {
         FXMLLoader loader = new FXMLLoader(url.toUri().toURL());
         Parent root = loader.load();
         Scene scene = new Scene(root);
+        url = Paths.get("src/main/resources/style.css");
+        scene.getStylesheets().add(url.toUri().toURL().toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.show();
 

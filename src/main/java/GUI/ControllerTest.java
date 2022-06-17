@@ -13,12 +13,15 @@ import javafx.scene.control.*;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class ControllerTest {
 
-    private static final String[] emojis = {"\\uD83D\\uDE00", "\\uD83D\\uDE42", "\\uD83D\\uDE15"};
+    private static final byte[][] emojis = {new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x81}
+            , new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0xAD}
+            , new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x90}};
     private Socket socket;
     private game gamePlayerIdPlaying;
     private ConnectionHandler connectionHandler;
@@ -30,7 +33,7 @@ public class ControllerTest {
             String emoji = null;
             for (MenuItem item : emojiMenu.getItems()) {
                 if (item == event.getSource()) {
-                    emoji = item.getText();
+                    emoji = ((Label) item.getGraphic()).getText();
                     break;
                 }
             }
@@ -65,7 +68,6 @@ public class ControllerTest {
     @FXML
     public void initialize() {
         //Connection
-
         try {
             socket = new Socket("localhost", 80);
             connectionHandler = new ConnectionHandler(socket);
@@ -74,16 +76,17 @@ public class ControllerTest {
             throw new RuntimeException(e);
         }
 
-
         setEmojis();
-
-
     }
 
 
     public void setEmojis() {
-        for (String emoji : emojis) {
-            MenuItem menuItem = new MenuItem(emoji);
+        for (byte[] emoji : emojis) {
+            MenuItem menuItem = new MenuItem();
+            Label label = new Label();
+            label.setText(new String(emoji, StandardCharsets.UTF_8));
+            label.setId("emoji");
+            menuItem.setGraphic(label);
             menuItem.setOnAction(emojiAction);
             emojiMenu.getItems().add(menuItem);
         }
@@ -117,8 +120,6 @@ public class ControllerTest {
         LinkedList<String> cardsNumber = player.getNumericalCardsNumber();
         this.yourCards.setItems(FXCollections.observableArrayList(cardsNumber));
         this.yourCards.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-
-
     }
 
 

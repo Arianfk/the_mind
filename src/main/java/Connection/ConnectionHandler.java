@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 public class ConnectionHandler extends Thread {
     private final Socket socket;
     private byte[] authToken;
-    private MessageRecieveListener messageReceiveListener;
+    private MessageReceiveListener messageReceiveListener;
 
     public ConnectionHandler(Socket socket) {
         this.socket = socket;
@@ -21,11 +21,11 @@ public class ConnectionHandler extends Thread {
         this.authToken = authToken;
     }
 
-    public MessageRecieveListener getMessageReceiveListener() {
+    public MessageReceiveListener getMessageReceiveListener() {
         return messageReceiveListener;
     }
 
-    public void setMessageReceiveListener(MessageRecieveListener messageRecieveListener) {
+    public void setMessageReceiveListener(MessageReceiveListener messageRecieveListener) {
         this.messageReceiveListener = messageRecieveListener;
     }
 
@@ -71,7 +71,7 @@ public class ConnectionHandler extends Thread {
         super.run();
         while (true) {
             Message message = waitForMessage();
-            if (messageReceiveListener != null) messageReceiveListener.onMessageRecieved(message);
+            if (messageReceiveListener != null) messageReceiveListener.onMessageReceived(message);
         }
     }
 }

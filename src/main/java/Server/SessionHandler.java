@@ -2,6 +2,7 @@ package Server;
 
 import Connection.ConnectionHandler;
 import Connection.Message;
+import Connection.MessageReceiveListener;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -26,10 +27,17 @@ public class SessionHandler extends Thread {
     public void run() {
         super.run();
 
+        // Sending AuthToken
         connectionHandler.sendMessage(new Message(authToken));
-        System.out.println(new String(connectionHandler.waitForMessage().getBody()));
 
-        connectionHandler.sendMessage(new Message(authToken, "Well Done"));
+        connectionHandler.setMessageReceiveListener(new MessageReceiveListener() {
+            @Override
+            public void onMessageReceived(Message message) {
+                System.out.println(new String(message.getBody()));
+            }
+        });
+
+        connectionHandler.start();
     }
 
     public void close() {
