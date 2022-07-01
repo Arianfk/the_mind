@@ -14,6 +14,12 @@ public class Message {
         this.header = 0;
     }
 
+    public Message(byte header) {
+        this.authToken = new byte[AUTH_TOKEN_LENGTH];
+        this.body = new byte[0];
+        this.header = header;
+    }
+
     public Message(byte[] authToken) {
         this.authToken = authToken;
         this.body = new byte[0];

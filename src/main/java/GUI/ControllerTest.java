@@ -1,10 +1,13 @@
 package GUI;
 
 import Connection.ConnectionHandler;
+import Connection.JsonRoom;
 import Connection.Message;
 import Logic.Controller.GameCardsInformation;
 import Logic.Model.Game.game;
 import Logic.Model.Players.Player;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -16,12 +19,11 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Optional;
 
 public class ControllerTest {
-
-    private static final byte[][] emojis = {new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x81}
-            , new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0xAD}
-            , new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x90}};
+    private static final byte[][] emojis = {new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x81}, new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0xAD}, new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x90}};
+    private boolean isHost;
     private Socket socket;
     private game gamePlayerIdPlaying;
     private ConnectionHandler connectionHandler;
@@ -76,7 +78,38 @@ public class ControllerTest {
             throw new RuntimeException(e);
         }
 
-        setEmojis();
+        // Name
+        Optional<String> result;
+        do {
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setHeaderText("Input Your Name: ");
+            result = dialog.showAndWait();
+        } while (result.isEmpty() || result.get().equals(""));
+
+        connectionHandler.sendMessage(new Message(result.get()));
+
+        // Gson
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = gsonBuilder.create();
+
+        // Room
+        connectionHandler.sendWithAT(new Message((byte) 0x01));
+        JsonRoom[] rooms = gson.fromJson(new String(connectionHandler.waitForMessage().getBody()), JsonRoom[].class);
+        RoomDialog dialog = new RoomDialog(rooms);
+        dialog.showAndWait();
+
+        JsonRoom jsonRoom = dialog.getResult();
+        if (jsonRoom == null) {
+            ChoiceDialog<Integer> choiceDialog = new ChoiceDialog<>(2, 2, 3, 4);
+            choiceDialog.setHeaderText("Number Of Players: ");
+            choiceDialog.showAndWait();
+
+            connectionHandler.sendWithAT(new Message(String.valueOf(choiceDialog.getResult()), (byte) 0x02));
+            isHost = true;
+        } else {
+            connectionHandler.sendWithAT(new Message(jsonRoom.getId(), (byte) 0x03));
+            isHost = false;
+        }
     }
 
 

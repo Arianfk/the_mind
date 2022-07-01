@@ -7,7 +7,8 @@ import java.util.List;
 
 public class Server {
     static ServerSocket serverSocket;
-    static List<SessionHandler> sessions = new ArrayList<>();
+    public static List<SessionHandler> sessions = new ArrayList<>();
+    public static List<Room> rooms = new ArrayList<>();
 
     public static void main(String[] args) {
         try {
