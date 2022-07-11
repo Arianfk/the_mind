@@ -8,7 +8,7 @@ public class JsonRoom {
 
     public JsonRoom(Room room) {
         this.id = room.getId();
-        this.hostName = room.getHost().getName();
+        this.hostName = room.getHost().getUserName();
         this.maximumNumberOfPlayers = room.getMaximumNumberOfPlayers();
     }
 

@@ -6,7 +6,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
-import javafx.util.Callback;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -71,6 +70,8 @@ public class RoomDialog extends Dialog<JsonRoom> {
                     RoomDialog.this.setResult(item);
                     RoomDialog.this.close();
                 });
+
+                button.setText("join");
             } else {
                 setGraphic(null);
             }

@@ -25,8 +25,8 @@ public class ConnectionHandler extends Thread {
         return messageReceiveListener;
     }
 
-    public void setMessageReceiveListener(MessageReceiveListener messageRecieveListener) {
-        this.messageReceiveListener = messageRecieveListener;
+    public void setMessageReceiveListener(MessageReceiveListener messageReceiveListener) {
+        this.messageReceiveListener = messageReceiveListener;
     }
 
     public void sendMessage(Message message) {

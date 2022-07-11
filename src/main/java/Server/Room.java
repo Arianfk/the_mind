@@ -1,5 +1,8 @@
 package Server;
 
+import Game.Game;
+import Game.Player;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,10 +11,10 @@ public class Room {
     private final SessionHandler host;
     private final int maximumNumberOfPlayers;
     private final String id;
-    //private Game game;
     private List<SessionHandler> players;
 
     private boolean started = false;
+    private Game game;
 
     public Room(SessionHandler host, int maximumNumberOfPlayers) {
         this.id = String.valueOf(ROOM_COUNT++);
@@ -19,6 +22,11 @@ public class Room {
         this.maximumNumberOfPlayers = maximumNumberOfPlayers;
         this.players = new ArrayList<>();
         this.players.add(host);
+        this.game = new Game(maximumNumberOfPlayers);
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     public boolean isStarted() {
@@ -47,5 +55,10 @@ public class Room {
 
     public void setPlayers(List<SessionHandler> players) {
         this.players = players;
+    }
+
+    public void addPlayer(SessionHandler sessionHandler) {
+        players.add(sessionHandler);
+        game.getPlayers().add(new Player(game));
     }
 }

@@ -94,7 +94,9 @@ public class ControllerTest {
 
         // Room
         connectionHandler.sendWithAT(new Message((byte) 0x01));
-        JsonRoom[] rooms = gson.fromJson(new String(connectionHandler.waitForMessage().getBody()), JsonRoom[].class);
+        String json = new String(connectionHandler.waitForMessage().getBody());
+        System.out.println(json);
+        JsonRoom[] rooms = gson.fromJson(json, JsonRoom[].class);
         RoomDialog dialog = new RoomDialog(rooms);
         dialog.showAndWait();
 
