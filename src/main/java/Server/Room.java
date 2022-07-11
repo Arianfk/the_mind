@@ -1,7 +1,10 @@
 package Server;
 
+import Connection.Message;
 import Game.Game;
 import Game.Player;
+import com.google.gson.Gson;
+import Game.NinjaListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,53 @@ public class Room {
         this.players = new ArrayList<>();
         this.players.add(host);
         this.game = new Game(maximumNumberOfPlayers);
+        Player player = new Player(game);
+        game.getPlayers().add(player);
+
+        player.setPlayerHandListener(player1 -> {
+            Gson gson = new Gson();
+            String json = gson.toJson(player1.getCards());
+            host.getConnectionHandler().sendWithAT(new Message(json, (byte) 0x02));
+
+            List<String> tmp = new ArrayList<>();
+            for (int i = 0; i < game.getPlayers().size(); i++) {
+                String s = players.get(i).getUserName() + " : " + game.getPlayers().get(i).getCardNumber();
+                tmp.add(s);
+            }
+
+            json = gson.toJson(tmp);
+            for (SessionHandler sessionHandler1 : players) {
+                sessionHandler1.getConnectionHandler().sendWithAT(new Message(json, (byte) 0x05));
+            }
+        });
+
+        this.game.setLastCardListener(lastCard -> {
+            for (SessionHandler sessionHandler : players) {
+                sessionHandler.getConnectionHandler().sendWithAT(new Message(String.valueOf(lastCard), (byte) 0x01));
+            }
+            if (game.nextLevelPossible())
+                players.get(0).getConnectionHandler().sendWithAT(new Message((byte) 0x06));
+        });
+
+        this.game.setHeartChangedListener(count -> {
+            for (SessionHandler sessionHandler : players) {
+                sessionHandler.getConnectionHandler().sendWithAT(new Message(String.valueOf(count), (byte) 0x03));
+            }
+        });
+
+        this.game.setStarChangedListener(count -> {
+            for (SessionHandler sessionHandler : players) {
+                sessionHandler.getConnectionHandler().sendWithAT(new Message(String.valueOf(count), (byte) 0x04));
+            }
+        });
+
+        this.game.setNinjaListener(ninja -> {
+            Gson gson = new Gson();
+            String json = gson.toJson(ninja);
+            for (SessionHandler sessionHandler : players) {
+                sessionHandler.getConnectionHandler().sendWithAT(new Message(json, (byte) 0x07));
+            }
+        });
     }
 
     public Game getGame() {
@@ -59,6 +109,32 @@ public class Room {
 
     public void addPlayer(SessionHandler sessionHandler) {
         players.add(sessionHandler);
-        game.getPlayers().add(new Player(game));
+        Player player = new Player(game);
+        game.getPlayers().add(player);
+        player.setPlayerHandListener(player1 -> {
+            Gson gson = new Gson();
+            String json = gson.toJson(player1.getCards());
+            sessionHandler.getConnectionHandler().sendWithAT(new Message(json, (byte) 0x02));
+
+            List<String> tmp = new ArrayList<>();
+            for (int i = 0; i < game.getPlayers().size(); i++) {
+                String s = players.get(i).getUserName() + " : " + game.getPlayers().get(i).getCardNumber();
+                tmp.add(s);
+            }
+
+            json = gson.toJson(tmp);
+            for (SessionHandler sessionHandler1 : players) {
+                sessionHandler1.getConnectionHandler().sendWithAT(new Message(json, (byte) 0x05));
+            }
+        });
+    }
+
+    public void play(SessionHandler sessionHandler) {
+        for (int i = 0; i < players.size(); i++) {
+            if (sessionHandler == players.get(i)) {
+                game.play(game.getPlayers().get(i));
+                break;
+            }
+        }
     }
 }

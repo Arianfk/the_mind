@@ -14,7 +14,11 @@ public class Game {
     private Integer lastPlayedCard = 0;
     private boolean lost = false;
     private boolean finished = false;
-
+    private LastCardListener lastCardListener;
+    private HeartChangedListener heartChangedListener;
+    private StarChangedListener starChangedListener;
+    private NinjaListener ninjaListener;
+    private int[] ninjaRes;
     public Game(int playerCount) {
         players = new ArrayList<>();
         this.playerCount = playerCount;
@@ -35,6 +39,44 @@ public class Game {
         }
     }
 
+    public void setNinjaListener(NinjaListener ninjaListener) {
+        this.ninjaListener = ninjaListener;
+    }
+
+    public void setHeartChangedListener(HeartChangedListener heartChangedListener) {
+        this.heartChangedListener = heartChangedListener;
+    }
+
+    public void setStarChangedListener(StarChangedListener starChangedListener) {
+        this.starChangedListener = starChangedListener;
+    }
+
+    public LastCardListener getLastCardListener() {
+        return lastCardListener;
+    }
+
+    public void setLastCardListener(LastCardListener lastCardListener) {
+        this.lastCardListener = lastCardListener;
+    }
+
+    public int getStarsCount() {
+        return starsCount;
+    }
+
+    public void setStarsCount(int starsCount) {
+        this.starsCount = starsCount;
+        starChangedListener.starChanged(starsCount);
+    }
+
+    public int getHeartsCount() {
+        return heartsCount;
+    }
+
+    public void setHeartsCount(int heartsCount) {
+        this.heartsCount = heartsCount;
+        heartChangedListener.onHeartChanged(heartsCount);
+    }
+
     public List<Player> getPlayers() {
         return players;
     }
@@ -46,6 +88,7 @@ public class Game {
 
         lastPlayedCard = min;
         player.removeMinimumCard();
+        lastCardListener.onLastCardChanged(lastPlayedCard);
         boolean flg = false;
         for (Player player1 : players) {
             Integer min1 = player1.getMinimumCard();
@@ -56,7 +99,7 @@ public class Game {
         }
 
         if (flg) {
-            heartsCount--;
+            setHeartsCount(getHeartsCount() - 1);
             if (heartsCount == 0) {
                 lost = true;
             }
@@ -71,10 +114,10 @@ public class Game {
         }
 
         if (rewards[level - 1] == 1 && heartsCount < 5)
-            heartsCount++;
+            setHeartsCount(getHeartsCount() + 1);
 
         if (rewards[level - 1] == 2 && starsCount < 3)
-            starsCount++;
+            setStarsCount(getStarsCount() + 1);
 
         boolean[] marked = new boolean[110];
         for (Player player : players) {
@@ -86,5 +129,41 @@ public class Game {
                 }
             }
         }
+
+        heartChangedListener.onHeartChanged(getHeartsCount());
+        starChangedListener.starChanged(getStarsCount());
+    }
+
+    public boolean nextLevelPossible() {
+        for (Player player : players) {
+            if (player.getCardNumber() > 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void newNinjaReq(Player player) {
+        ninjaRes = new int[players.size()];
+        for (int i = 0; i < players.size(); i++) {
+            Player player1 = players.get(i);
+            if (player == player1) {
+                ninjaRes[i] = 1;
+                break;
+            }
+        }
+
+        ninjaListener.onNinjaChanged(ninjaRes);
+    }
+
+    public void setNinjaResult(Player player, int st) {
+        for (int i = 0; i < players.size(); i++) {
+            if (player == players.get(i)) {
+                ninjaRes[i] = st;
+            }
+        }
+
+        ninjaListener.onNinjaChanged(ninjaRes);
     }
 }

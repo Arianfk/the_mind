@@ -3,11 +3,14 @@ package GUI;
 import Connection.ConnectionHandler;
 import Connection.JsonRoom;
 import Connection.Message;
+import Connection.MessageReceiveListener;
 import Logic.Controller.GameCardsInformation;
 import Logic.Model.Game.game;
 import Logic.Model.Players.Player;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -15,14 +18,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Optional;
+import java.util.*;
 
 public class ControllerTest {
     private static final byte[][] emojis = {new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x81}, new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0xAD}, new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x90}};
+    public Button startButton;
+    public Button playButton;
+    public Button ninjaRequestButton;
     private boolean isHost;
     private Socket socket;
     private game gamePlayerIdPlaying;
@@ -48,7 +53,7 @@ public class ControllerTest {
     @FXML
     private Label ninjaNumberLabel;
     @FXML
-    private Label LastPlayedCardLabel;
+    private Label lastPlayedCardLabel;
     @FXML
     private ListView<String> gameCardsInformation;
     @FXML
@@ -112,6 +117,51 @@ public class ControllerTest {
             connectionHandler.sendWithAT(new Message(jsonRoom.getId(), (byte) 0x03));
             isHost = false;
         }
+
+        if (!isHost) startButton.setVisible(false);
+
+        connectionHandler.setMessageReceiveListener(new MessageReceiveListener() {
+            @Override
+            public void onMessageReceived(Message message) {
+                switch (message.getHeader()) {
+                    case 0x01 -> {
+                        Platform.runLater(() -> lastPlayedCardLabel.setText(new String(message.getBody())));
+                    }
+                    case 0x02 -> {
+                        String json = new String(message.getBody());
+                        Type setType = new TypeToken<HashSet<String>>() {
+                        }.getType();
+                        Set<String> cards = gson.fromJson(json, setType);
+
+                        Platform.runLater(() -> yourCards.setItems(FXCollections.observableArrayList(cards)));
+                    }
+                    case 0x03 -> {
+                        Platform.runLater(() -> heartNumberLabel.setText("Hearts: " + new String(message.getBody())));
+                    }
+                    case 0x04 -> {
+                        Platform.runLater(() -> ninjaNumberLabel.setText("Ninja: " + new String(message.getBody())));
+                    }
+                    case 0x05 -> {
+                        Platform.runLater(() -> {
+                            String json1 = new String(message.getBody());
+                            Type listType = new TypeToken<ArrayList<String>>() {
+                            }.getType();
+
+                            ArrayList<String> list = gson.fromJson(json1, listType);
+                            gameCardsInformation.setItems(FXCollections.observableArrayList(list));
+                        });
+                    }
+                    case 0x06 -> {
+                        Platform.runLater(() -> startButton.setVisible(true));
+                    }
+                    case 0x07 -> {
+
+                    }
+                }
+            }
+        });
+
+        connectionHandler.start();
     }
 
 
@@ -161,13 +211,25 @@ public class ControllerTest {
     public void setLastPlayedCardLabel(game game) {
         String lastCard = game.getLastPlayedCardNumber();
         if (lastCard == null) {
-            LastPlayedCardLabel.setText("no one has played yet");
+            lastPlayedCardLabel.setText("no one has played yet");
             return;
         }
-        LastPlayedCardLabel.setText(lastCard);
+        lastPlayedCardLabel.setText(lastCard);
 
 
     }
 
 
+    public void startButtonClicked() {
+        connectionHandler.sendWithAT(new Message((byte) 0x04));
+        startButton.setVisible(false);
+    }
+
+    public void onPlayButtonClicked() {
+        connectionHandler.sendWithAT(new Message((byte) 0x05));
+    }
+
+    public void onNinjaRequest() {
+        connectionHandler.sendWithAT(new Message((byte) 0x06));
+    }
 }

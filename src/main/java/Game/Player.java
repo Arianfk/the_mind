@@ -8,9 +8,23 @@ public class Player {
     private final Game game;
     private Set<Integer> cards;
 
+    public Set<Integer> getCards() {
+        return cards;
+    }
+
+    private PlayerHandListener playerHandListener;
+
     public Player(Game game) {
         this.game = game;
         this.cards = new TreeSet<>();
+    }
+
+    public PlayerHandListener getPlayerHandListener() {
+        return playerHandListener;
+    }
+
+    public void setPlayerHandListener(PlayerHandListener playerHandListener) {
+        this.playerHandListener = playerHandListener;
     }
 
     public Integer getMinimumCard() {
@@ -21,10 +35,12 @@ public class Player {
 
     public void removeMinimumCard() {
         cards.remove(getMinimumCard());
+        playerHandListener.onPlayerHandChanged(this);
     }
 
-    public void addCard(Integer card){
+    public void addCard(Integer card) {
         cards.add(card);
+        playerHandListener.onPlayerHandChanged(this);
     }
 
     public int getCardNumber() {

@@ -19,11 +19,6 @@ public class SessionHandler extends Thread {
     private final ConnectionHandler connectionHandler;
     private final byte[] authToken;
     private String userName;
-
-    public String getUserName() {
-        return userName;
-    }
-
     private Room room;
 
     public SessionHandler(Socket socket) {
@@ -35,6 +30,14 @@ public class SessionHandler extends Thread {
         secureRandom.nextBytes(authToken);
 
         connectionHandler.setAuthToken(authToken);
+    }
+
+    public ConnectionHandler getConnectionHandler() {
+        return connectionHandler;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     @Override
@@ -72,6 +75,7 @@ public class SessionHandler extends Thread {
                     case 0x02 -> {
                         int numPlayers = Integer.parseInt(new String(message.getBody()));
                         Room room1 = new Room(SessionHandler.this, numPlayers);
+                        SessionHandler.this.room = room1;
                         Server.rooms.add(room1);
                     }
                     case 0x03 -> {
@@ -87,7 +91,19 @@ public class SessionHandler extends Thread {
                         }
                     }
                     case 0x04 -> {
-
+                        // Host Start
+                        room.getGame().nextLevel();
+                    }
+                    case 0x05 -> {
+                        room.play(SessionHandler.this);
+                    }
+                    case 0x06 -> {
+                        for (int i = 0; i < room.getPlayers().size(); i++) {
+                            if (room.getPlayers().get(i) == SessionHandler.this) {
+                                room.getGame().newNinjaReq(room.getGame().getPlayers().get(i));
+                                break ;
+                            }
+                        }
                     }
                 }
             }
