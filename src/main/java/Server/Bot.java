@@ -13,16 +13,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Bot extends Thread {
-    private final Socket socket;
     private final ConnectionHandler connectionHandler;
     private Set<Integer> cards;
     private Integer lastPlayedCard;
     private Thread thread;
     private Gson gson;
+    private final int botCount;
 
-    public Bot(String name, String roomId) {
+    public Bot(String name, String roomId, int botCount) {
+        this.botCount = botCount;
         try {
-            socket = new Socket("localhost", 80);
+            Socket socket = new Socket("localhost", 80);
             connectionHandler = new ConnectionHandler(socket);
             connectionHandler.setAuthToken(connectionHandler.waitForMessage().getAuthToken());
         } catch (IOException e) {
@@ -49,8 +50,8 @@ public class Bot extends Thread {
                         try {
                             Thread.sleep(getWaitTime());
                             connectionHandler.sendWithAT(new Message((byte) 0x05));
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
+                        } catch (InterruptedException ignored) {
+
                         }
                     };
 
@@ -79,6 +80,6 @@ public class Bot extends Thread {
         if (cards.size() > 0)
             x = (Collections.min(cards) - lastPlayedCard) * 1000;
         int e = (int) Math.floor(Math.random() * 1000);
-        return x + e;
+        return (int) Math.floor((x + e) * 4.0 / (botCount + 3.0));
     }
 }

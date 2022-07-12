@@ -7,6 +7,7 @@ import Connection.MessageReceiveListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SessionHandler extends Thread {
-    private static Object lock = new Object();
     private final Socket socket;
     private final ConnectionHandler connectionHandler;
     private final byte[] authToken;
@@ -38,6 +38,15 @@ public class SessionHandler extends Thread {
 
     public String getUserName() {
         return userName;
+    }
+
+    public void close() {
+        try {
+            if (!socket.isClosed())
+                socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -94,7 +103,14 @@ public class SessionHandler extends Thread {
                         // Host Start
                         if (room.getGame().getLevel() == 0)
                             room.fillWithBots();
+                        room.setStarted(true);
                         room.getGame().nextLevel();
+                        if (room.getGame().isWin()) {
+                            for (SessionHandler sessionHandler : room.getPlayers()) {
+                                sessionHandler.getConnectionHandler().sendWithAT(new Message((byte) 0x09));
+                                sessionHandler.close();
+                            }
+                        }
                     }
                     case 0x05 -> {
                         room.play(SessionHandler.this);
@@ -103,7 +119,7 @@ public class SessionHandler extends Thread {
                         for (int i = 0; i < room.getPlayers().size(); i++) {
                             if (room.getPlayers().get(i) == SessionHandler.this) {
                                 room.getGame().newNinjaReq(room.getGame().getPlayers().get(i));
-                                break ;
+                                break;
                             }
                         }
                     }
@@ -111,8 +127,14 @@ public class SessionHandler extends Thread {
                         for (int i = 0; i < room.getPlayers().size(); i++) {
                             if (room.getPlayers().get(i) == SessionHandler.this) {
                                 room.getGame().setNinjaResult(room.getGame().getPlayers().get(i), Integer.parseInt(new String(message.getBody())));
-                                break ;
+                                break;
                             }
+                        }
+                    }
+                    case 0x08 -> {
+                        for (SessionHandler sessionHandler : room.getPlayers()) {
+                            if (sessionHandler != SessionHandler.this)
+                                sessionHandler.getConnectionHandler().sendWithAT(new Message(SessionHandler.this.userName + "\n" + (new String(message.getBody())), (byte) 0x08));
                         }
                     }
                 }

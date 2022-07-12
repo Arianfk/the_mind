@@ -13,16 +13,8 @@ public class ConnectionHandler extends Thread {
         this.socket = socket;
     }
 
-    public byte[] getAuthToken() {
-        return authToken;
-    }
-
     public void setAuthToken(byte[] authToken) {
         this.authToken = authToken;
-    }
-
-    public MessageReceiveListener getMessageReceiveListener() {
-        return messageReceiveListener;
     }
 
     public void setMessageReceiveListener(MessageReceiveListener messageReceiveListener) {
@@ -31,7 +23,8 @@ public class ConnectionHandler extends Thread {
 
     public void sendMessage(Message message) {
         try {
-            socket.getOutputStream().write(message.toByteArray());
+            if (!socket.isClosed())
+                socket.getOutputStream().write(message.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -60,8 +53,8 @@ public class ConnectionHandler extends Thread {
             System.arraycopy(body, 0, bytes, authTokenAndHeaderAndLength.length, bodyLen);
 
             message.fromByteArray(bytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ignored) {
+
         }
         return message;
     }
@@ -69,7 +62,7 @@ public class ConnectionHandler extends Thread {
     @Override
     public void run() {
         super.run();
-        while (true) {
+        while (!socket.isClosed()) {
             Message message = waitForMessage();
             if (messageReceiveListener != null) messageReceiveListener.onMessageReceived(message);
         }

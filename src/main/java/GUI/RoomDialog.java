@@ -63,7 +63,9 @@ public class RoomDialog extends Dialog<JsonRoom> {
         protected void updateItem(JsonRoom item, boolean empty) {
             super.updateItem(item, empty);
             if (!empty && item != null) {
+                pane.setPadding(new Insets(0));
                 setGraphic(pane);
+                setPadding(new Insets(0));
                 nameLabel.setText(item.getHostName());
                 idLabel.setText(item.getId());
                 button.setOnAction(event -> {

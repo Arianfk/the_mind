@@ -4,26 +4,31 @@ import Connection.ConnectionHandler;
 import Connection.JsonRoom;
 import Connection.Message;
 import Connection.MessageReceiveListener;
-import Logic.Controller.GameCardsInformation;
-import Logic.Model.Game.game;
-import Logic.Model.Players.Player;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.Pane;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class ControllerTest {
     private static final byte[][] emojis = {new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x81}, new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0xAD}, new byte[]{(byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x90}};
@@ -32,24 +37,23 @@ public class ControllerTest {
     public Button ninjaRequestButton;
     public int ninjaState = 0;
     public Dialog<ButtonType> ninjaDialog;
-    private boolean isHost;
     private Socket socket;
-    private game gamePlayerIdPlaying;
     private ConnectionHandler connectionHandler;
     @FXML
     private MenuButton emojiMenu;
     private final EventHandler<ActionEvent> emojiAction = new EventHandler<>() {
         @Override
         public void handle(ActionEvent event) {
-            String emoji = null;
-            for (MenuItem item : emojiMenu.getItems()) {
+            //String emoji = null;
+            ObservableList<MenuItem> items = emojiMenu.getItems();
+            for (int i = 0; i < items.size(); i++) {
+                MenuItem item = items.get(i);
                 if (item == event.getSource()) {
-                    emoji = ((Label) item.getGraphic()).getText();
+                    // emoji = ((Label) item.getGraphic()).getText();
+                    connectionHandler.sendWithAT(new Message(String.valueOf(i), (byte) 0x08));
                     break;
                 }
             }
-
-            connectionHandler.sendWithAT(new Message(emoji, (byte) 1));
         }
     };
     @FXML
@@ -62,19 +66,6 @@ public class ControllerTest {
     private ListView<String> gameCardsInformation;
     @FXML
     private ListView<String> yourCards;
-    private final EventHandler<ActionEvent> chooseCardAction = new EventHandler<ActionEvent>() {
-        @Override
-        public void handle(ActionEvent event) {
-            String chosenNumber = null;
-            for (String x : yourCards.getItems()) {
-                if (x.equals(event.getSource())) {
-                    chosenNumber = x;
-                    break;
-                }
-            }
-            connectionHandler.sendWithAT(new Message(chosenNumber, (byte) 2));
-        }
-    };
 
     @FXML
     public void initialize() {
@@ -110,6 +101,7 @@ public class ControllerTest {
         dialog.showAndWait();
 
         JsonRoom jsonRoom = dialog.getResult();
+        boolean isHost;
         if (jsonRoom == null) {
             ChoiceDialog<Integer> choiceDialog = new ChoiceDialog<>(2, 2, 3, 4);
             choiceDialog.setHeaderText("Number Of Players: ");
@@ -124,10 +116,23 @@ public class ControllerTest {
 
         if (!isHost) startButton.setVisible(false);
 
+        setEmojis();
         connectionHandler.setMessageReceiveListener(new MessageReceiveListener() {
             @Override
             public void onMessageReceived(Message message) {
                 switch (message.getHeader()) {
+                    case 0x09 -> {
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setContentText("WIN!?");
+                            alert.showAndWait();
+                            try {
+                                socket.close();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    }
                     case 0x01 -> {
                         Platform.runLater(() -> lastPlayedCardLabel.setText(new String(message.getBody())));
                     }
@@ -140,7 +145,16 @@ public class ControllerTest {
                         Platform.runLater(() -> yourCards.setItems(FXCollections.observableArrayList(cards)));
                     }
                     case 0x03 -> {
+                        int count = Integer.parseInt(new String(message.getBody()));
                         Platform.runLater(() -> heartNumberLabel.setText("Hearts: " + new String(message.getBody())));
+                        if (count == 0) {
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                alert.setContentText("LOSS!?");
+                                alert.showAndWait();
+                            });
+                            close();
+                        }
                     }
                     case 0x04 -> {
                         Platform.runLater(() -> ninjaNumberLabel.setText("Ninja: " + new String(message.getBody())));
@@ -211,6 +225,32 @@ public class ControllerTest {
                             }
                         }
                     }
+                    case 0x08 -> {
+                        String tmp = new String(message.getBody());
+                        String[] t = tmp.split("\n");
+                        String name = t[0];
+                        int emojiIndex = Integer.parseInt(t[1]);
+                        Platform.runLater(() -> {
+                            Dialog<ButtonType> emojiDialog = new Dialog<>();
+                            Path url = Paths.get("src/main/resources/style.css");
+                            try {
+                                emojiDialog.getDialogPane().getScene().getStylesheets().add(url.toUri().toURL().toExternalForm());
+                            } catch (MalformedURLException e) {
+                                throw new RuntimeException(e);
+                            }
+                            emojiDialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+                            emojiDialog.setHeaderText(name);
+                            Label label = new Label();
+                            label.setLayoutX(45);
+                            label.setLayoutY(10);
+                            label.setText(new String(emojis[emojiIndex], StandardCharsets.UTF_8));
+                            label.setId("emoji");
+                            Pane pane = new Pane();
+                            pane.getChildren().add(label);
+                            emojiDialog.getDialogPane().setContent(pane);
+                            emojiDialog.showAndWait();
+                        });
+                    }
                 }
             }
         });
@@ -218,6 +258,13 @@ public class ControllerTest {
         connectionHandler.start();
     }
 
+    public void close() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public void setEmojis() {
         for (byte[] emoji : emojis) {
@@ -230,49 +277,6 @@ public class ControllerTest {
             emojiMenu.getItems().add(menuItem);
         }
     }
-
-
-    public void setEveryThing(game game, Player player) {
-        setEmojis();
-        setGameCardsInformation(game);
-        setHeartNumberLabel(game);
-        setLastPlayedCardLabel(game);
-        setNinjaNumberLabel(game);
-        setYourCards(player);
-    }
-
-    public void setHeartNumberLabel(game game) {
-        heartNumberLabel.setText("number of hearts : " + game.getNumberOfHeartCards());
-    }
-
-    public void setNinjaNumberLabel(game game) {
-        ninjaNumberLabel.setText("number of ninja cads : " + game.getNumberOfNinjaCards());
-    }
-
-    public void setGameCardsInformation(game game) {
-        GameCardsInformation info = new GameCardsInformation(game);
-        ArrayList<String> information = info.getGameCardsInformation();
-        this.gameCardsInformation.setItems(FXCollections.observableArrayList(information));
-    }
-
-    public void setYourCards(Player player) {
-        LinkedList<String> cardsNumber = player.getNumericalCardsNumber();
-        this.yourCards.setItems(FXCollections.observableArrayList(cardsNumber));
-        this.yourCards.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-    }
-
-
-    public void setLastPlayedCardLabel(game game) {
-        String lastCard = game.getLastPlayedCardNumber();
-        if (lastCard == null) {
-            lastPlayedCardLabel.setText("no one has played yet");
-            return;
-        }
-        lastPlayedCardLabel.setText(lastCard);
-
-
-    }
-
 
     public void startButtonClicked() {
         connectionHandler.sendWithAT(new Message((byte) 0x04));

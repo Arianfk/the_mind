@@ -5,15 +5,13 @@ import java.util.List;
 
 public class Game {
     private final int[] rewards = {0, 2, 1, 0, 2, 1, 0, 2, 1, 0, 0, 0};
-    private final int playerCount;
     private final List<Player> players;
     private int level = 0;
     private int starsCount;
     private int lastLevel;
     private int heartsCount;
     private Integer lastPlayedCard = 0;
-    private boolean lost = false;
-    private boolean finished = false;
+    private boolean win = false;
     private LastCardListener lastCardListener;
     private HeartChangedListener heartChangedListener;
     private StarChangedListener starChangedListener;
@@ -22,7 +20,6 @@ public class Game {
 
     public Game(int playerCount) {
         players = new ArrayList<>();
-        this.playerCount = playerCount;
         this.starsCount = 1;
         switch (playerCount) {
             case 2 -> {
@@ -50,10 +47,6 @@ public class Game {
 
     public void setStarChangedListener(StarChangedListener starChangedListener) {
         this.starChangedListener = starChangedListener;
-    }
-
-    public LastCardListener getLastCardListener() {
-        return lastCardListener;
     }
 
     public void setLastCardListener(LastCardListener lastCardListener) {
@@ -88,28 +81,31 @@ public class Game {
             return;
 
         player.removeMinimumCard();
-        setLastPlayedCard(min);
+
         boolean flg = false;
         for (Player player1 : players) {
             Integer min1 = player1.getMinimumCard();
-            if (min1 != null && min1 < min) {
+            while (min1 != null && min1 < min) {
                 flg = true;
                 player1.removeMinimumCard();
+                min1 = player1.getMinimumCard();
             }
         }
 
+        setLastPlayedCard(min);
         if (flg) {
             setHeartsCount(getHeartsCount() - 1);
-            if (heartsCount == 0) {
-                lost = true;
-            }
         }
+    }
+
+    public boolean isWin() {
+        return win;
     }
 
     public void nextLevel() {
         level++;
         if (level > lastLevel) {
-            finished = true;
+            win = true;
             return;
         }
 
