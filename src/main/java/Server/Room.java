@@ -14,8 +14,8 @@ public class Room {
     private final int maximumNumberOfPlayers;
     private final String id;
     private final List<SessionHandler> players;
-    private final Game game;
     private boolean started = false;
+    private final Game game;
 
     public Room(SessionHandler host, int maximumNumberOfPlayers) {
         this.id = String.valueOf(ROOM_COUNT++);
@@ -48,13 +48,15 @@ public class Room {
             for (SessionHandler sessionHandler : players) {
                 sessionHandler.getConnectionHandler().sendWithAT(new Message(String.valueOf(lastCard), (byte) 0x01));
             }
-            if (game.nextLevelPossible()) players.get(0).getConnectionHandler().sendWithAT(new Message((byte) 0x06));
+            if (game.nextLevelPossible())
+                players.get(0).getConnectionHandler().sendWithAT(new Message((byte) 0x06));
         });
 
         this.game.setHeartChangedListener(count -> {
             for (SessionHandler sessionHandler : players) {
                 sessionHandler.getConnectionHandler().sendWithAT(new Message(String.valueOf(count), (byte) 0x03));
-                if (count == 0) sessionHandler.close();
+                if (count == 0)
+                    sessionHandler.close();
             }
         });
 

@@ -1,12 +1,13 @@
 package Game;
 
+import Game.Listeners.PlayerHandListener;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class Player {
-    private final Game game;
-    private Set<Integer> cards;
+    private final Set<Integer> cards;
 
     public Set<Integer> getCards() {
         return cards;
@@ -15,7 +16,6 @@ public class Player {
     private PlayerHandListener playerHandListener;
 
     public Player(Game game) {
-        this.game = game;
         this.cards = new TreeSet<>();
     }
 

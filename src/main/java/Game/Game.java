@@ -1,5 +1,10 @@
 package Game;
 
+import Game.Listeners.HeartChangedListener;
+import Game.Listeners.LastCardListener;
+import Game.Listeners.NinjaListener;
+import Game.Listeners.StarChangedListener;
+
 import java.util.ArrayList;
 import java.util.List;
 

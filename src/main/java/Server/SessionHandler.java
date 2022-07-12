@@ -103,6 +103,12 @@ public class SessionHandler extends Thread {
                         // Host Start
                         if (room.getGame().getLevel() == 0)
                             room.fillWithBots();
+
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
                         room.setStarted(true);
                         room.getGame().nextLevel();
                         if (room.getGame().isWin()) {
