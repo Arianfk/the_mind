@@ -1,0 +1,78 @@
+package Server;
+
+import Connection.ConnectionHandler;
+import Connection.Message;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.Socket;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+
+public class Bot extends Thread {
+    private final Socket socket;
+    private final ConnectionHandler connectionHandler;
+    private Set<Integer> cards;
+    private Integer lastPlayedCard;
+    private Thread thread;
+    private Gson gson;
+
+    public Bot(String name, String roomId) {
+        try {
+            socket = new Socket("localhost", 80);
+            connectionHandler = new ConnectionHandler(socket);
+            connectionHandler.setAuthToken(connectionHandler.waitForMessage().getAuthToken());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        connectionHandler.sendWithAT(new Message(name));
+        connectionHandler.sendWithAT(new Message(roomId, (byte) 0x03));
+    }
+
+    @Override
+    public void run() {
+        super.run();
+
+        this.gson = new Gson();
+        connectionHandler.setMessageReceiveListener(message -> {
+            switch (message.getHeader()) {
+                case 0x01 -> {
+                    lastPlayedCard = Integer.parseInt(new String(message.getBody()));
+                    if (thread != null)
+                        thread.interrupt();
+
+                    Runnable runnable = () -> {
+                        try {
+                            Thread.sleep(getWaitTime());
+                            connectionHandler.sendWithAT(new Message((byte) 0x05));
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    };
+
+                    thread = new Thread(runnable);
+                    thread.start();
+                }
+                case 0x02 -> {
+                    String json = new String(message.getBody());
+                    Type setType = new TypeToken<HashSet<Integer>>() {
+                    }.getType();
+                    this.cards = gson.fromJson(json, setType);
+                }
+                case 0x07 -> {
+                    if (message.getBody().length == 0)
+                        connectionHandler.sendWithAT(new Message("1", (byte) 0x07));
+                }
+            }
+        });
+        connectionHandler.start();
+    }
+
+    public int getWaitTime() {
+        return 10000;
+    }
+}

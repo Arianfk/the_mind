@@ -4,7 +4,6 @@ import Connection.Message;
 import Game.Game;
 import Game.Player;
 import com.google.gson.Gson;
-import Game.NinjaListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,10 +66,9 @@ public class Room {
         });
 
         this.game.setNinjaListener(ninja -> {
-            Gson gson = new Gson();
-            String json = gson.toJson(ninja);
-            for (SessionHandler sessionHandler : players) {
-                sessionHandler.getConnectionHandler().sendWithAT(new Message(json, (byte) 0x07));
+            for (int i = 0; i < players.size(); i++) {
+                SessionHandler sessionHandler = players.get(i);
+                sessionHandler.getConnectionHandler().sendWithAT(new Message((ninja == null ? "" : String.valueOf(ninja[i])), (byte) 0x07));
             }
         });
     }
@@ -135,6 +133,14 @@ public class Room {
                 game.play(game.getPlayers().get(i));
                 break;
             }
+        }
+    }
+
+    public void fillWithBots() {
+        int t = maximumNumberOfPlayers - players.size();
+        for (int i = 0; i < t; i++) {
+            Bot bot = new Bot("Bot " + (i + 1), id);
+            bot.start();
         }
     }
 }

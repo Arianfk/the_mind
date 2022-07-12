@@ -19,6 +19,7 @@ public class Game {
     private StarChangedListener starChangedListener;
     private NinjaListener ninjaListener;
     private int[] ninjaRes;
+
     public Game(int playerCount) {
         players = new ArrayList<>();
         this.playerCount = playerCount;
@@ -86,9 +87,8 @@ public class Game {
         if (min == null)
             return;
 
-        lastPlayedCard = min;
         player.removeMinimumCard();
-        lastCardListener.onLastCardChanged(lastPlayedCard);
+        setLastPlayedCard(min);
         boolean flg = false;
         for (Player player1 : players) {
             Integer min1 = player1.getMinimumCard();
@@ -119,7 +119,13 @@ public class Game {
         if (rewards[level - 1] == 2 && starsCount < 3)
             setStarsCount(getStarsCount() + 1);
 
+        setLastPlayedCard(0);
         boolean[] marked = new boolean[110];
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         for (Player player : players) {
             while (player.getCardNumber() < level) {
                 int x = (int) Math.floor(Math.random() * 100) + 1;
@@ -157,11 +163,44 @@ public class Game {
         ninjaListener.onNinjaChanged(ninjaRes);
     }
 
+    public void setLastPlayedCard(Integer lastPlayedCard) {
+        this.lastPlayedCard = lastPlayedCard;
+        lastCardListener.onLastCardChanged(lastPlayedCard);
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
     public void setNinjaResult(Player player, int st) {
         for (int i = 0; i < players.size(); i++) {
             if (player == players.get(i)) {
                 ninjaRes[i] = st;
             }
+        }
+
+        int flg = 1;
+        for (int i = 0; i < players.size(); i++) {
+            if (ninjaRes[i] == 0)
+                flg = 0;
+            else if (ninjaRes[i] == 2 && flg == 1)
+                flg = 2;
+        }
+
+        if (flg > 0) {
+            if (flg == 1) {
+                setStarsCount(getStarsCount() - 1);
+                Integer max = lastPlayedCard;
+                for (Player player1 : players) {
+                    Integer min = player1.getMinimumCard();
+                    if (min != null)
+                        max = Math.max(max, min);
+                    player1.removeMinimumCard();
+                }
+
+                setLastPlayedCard(max);
+            }
+            ninjaRes = null;
         }
 
         ninjaListener.onNinjaChanged(ninjaRes);

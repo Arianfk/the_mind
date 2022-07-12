@@ -92,6 +92,8 @@ public class SessionHandler extends Thread {
                     }
                     case 0x04 -> {
                         // Host Start
+                        if (room.getGame().getLevel() == 0)
+                            room.fillWithBots();
                         room.getGame().nextLevel();
                     }
                     case 0x05 -> {
@@ -101,6 +103,14 @@ public class SessionHandler extends Thread {
                         for (int i = 0; i < room.getPlayers().size(); i++) {
                             if (room.getPlayers().get(i) == SessionHandler.this) {
                                 room.getGame().newNinjaReq(room.getGame().getPlayers().get(i));
+                                break ;
+                            }
+                        }
+                    }
+                    case 0x07 -> {
+                        for (int i = 0; i < room.getPlayers().size(); i++) {
+                            if (room.getPlayers().get(i) == SessionHandler.this) {
+                                room.getGame().setNinjaResult(room.getGame().getPlayers().get(i), Integer.parseInt(new String(message.getBody())));
                                 break ;
                             }
                         }

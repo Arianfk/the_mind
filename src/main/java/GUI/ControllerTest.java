@@ -13,8 +13,10 @@ import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 
 import java.io.IOException;
@@ -28,6 +30,8 @@ public class ControllerTest {
     public Button startButton;
     public Button playButton;
     public Button ninjaRequestButton;
+    public int ninjaState = 0;
+    public Dialog<ButtonType> ninjaDialog;
     private boolean isHost;
     private Socket socket;
     private game gamePlayerIdPlaying;
@@ -91,7 +95,7 @@ public class ControllerTest {
             result = dialog.showAndWait();
         } while (result.isEmpty() || result.get().equals(""));
 
-        connectionHandler.sendMessage(new Message(result.get()));
+        connectionHandler.sendWithAT(new Message(result.get()));
 
         // Gson
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -155,7 +159,57 @@ public class ControllerTest {
                         Platform.runLater(() -> startButton.setVisible(true));
                     }
                     case 0x07 -> {
-
+                        if (message.getBody().length == 0) {
+                            Platform.runLater(() -> {
+                                if (ninjaDialog != null) {
+                                    ninjaDialog.setOnCloseRequest(null);
+                                    ninjaDialog.getDialogPane().getScene().getWindow().setOnCloseRequest(null);
+                                    ninjaDialog.close();
+                                }
+                            });
+                            ninjaState = 0;
+                        } else {
+                            int state = Integer.parseInt(new String(message.getBody()));
+                            if (state == 0) {
+                                if (ninjaState != 1) {
+                                    ninjaState = 1;
+                                    Platform.runLater(() -> {
+                                        ninjaDialog = new Dialog<>();
+                                        ninjaDialog.setDialogPane(new DialogPane() {
+                                            @Override
+                                            protected Node createButton(ButtonType buttonType) {
+                                                Button button = (Button) super.createButton(buttonType);
+                                                button.setOnAction(event -> connectionHandler.sendWithAT(new Message((buttonType == ButtonType.YES ? "1" : "2"), (byte) 0x07)));
+                                                return button;
+                                            }
+                                        });
+                                        ninjaDialog.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+                                        ninjaDialog.setHeaderText("Do you want to use star card?");
+                                        ninjaDialog.setOnCloseRequest(Event::consume);
+                                        ninjaDialog.getDialogPane().getScene().getWindow().setOnCloseRequest(Event::consume);
+                                        ninjaDialog.showAndWait();
+                                    });
+                                }
+                            } else {
+                                if (ninjaState != 2) {
+                                    if (ninjaState == 1) {
+                                        Platform.runLater(() -> {
+                                            ninjaDialog.setOnCloseRequest(null);
+                                            ninjaDialog.getDialogPane().getScene().getWindow().setOnCloseRequest(null);
+                                            ninjaDialog.close();
+                                        });
+                                    }
+                                    ninjaState = 2;
+                                    Platform.runLater(() -> {
+                                        ninjaDialog = new Dialog<>();
+                                        ninjaDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                                        ninjaDialog.setHeaderText("Waiting for other players...");
+                                        ninjaDialog.getDialogPane().lookupButton(ButtonType.OK).setVisible(false);
+                                        ninjaDialog.showAndWait();
+                                    });
+                                }
+                            }
+                        }
                     }
                 }
             }
