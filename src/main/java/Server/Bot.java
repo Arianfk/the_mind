@@ -8,9 +8,9 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.Socket;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 public class Bot extends Thread {
     private final Socket socket;
@@ -62,6 +62,8 @@ public class Bot extends Thread {
                     Type setType = new TypeToken<HashSet<Integer>>() {
                     }.getType();
                     this.cards = gson.fromJson(json, setType);
+                    if (cards.size() > 0)
+                        System.out.println(Collections.min(cards));
                 }
                 case 0x07 -> {
                     if (message.getBody().length == 0)
@@ -73,6 +75,10 @@ public class Bot extends Thread {
     }
 
     public int getWaitTime() {
-        return 10000;
+        int x = 200;
+        if (cards.size() > 0)
+            x = (Collections.min(cards) - lastPlayedCard) * 1000;
+        int e = (int) Math.floor(Math.random() * 1000);
+        return x + e;
     }
 }

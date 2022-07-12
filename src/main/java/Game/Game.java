@@ -119,13 +119,14 @@ public class Game {
         if (rewards[level - 1] == 2 && starsCount < 3)
             setStarsCount(getStarsCount() + 1);
 
-        setLastPlayedCard(0);
         boolean[] marked = new boolean[110];
+        //******************************** YASNA ->
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        //********************************
         for (Player player : players) {
             while (player.getCardNumber() < level) {
                 int x = (int) Math.floor(Math.random() * 100) + 1;
@@ -136,6 +137,7 @@ public class Game {
             }
         }
 
+        setLastPlayedCard(0);
         heartChangedListener.onHeartChanged(getHeartsCount());
         starChangedListener.starChanged(getStarsCount());
     }
